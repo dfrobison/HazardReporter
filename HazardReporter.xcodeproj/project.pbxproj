@@ -13,6 +13,7 @@
 		3DE62D30243EB62F0077586D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3DE62D2F243EB62F0077586D /* Assets.xcassets */; };
 		3DE62D33243EB62F0077586D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3DE62D32243EB62F0077586D /* Preview Assets.xcassets */; };
 		3DE62D36243EB62F0077586D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3DE62D34243EB62F0077586D /* LaunchScreen.storyboard */; };
+		3DE62D40243EB6700077586D /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DE62D3F243EB6700077586D /* CloudKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +25,8 @@
 		3DE62D32243EB62F0077586D /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		3DE62D35243EB62F0077586D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		3DE62D37243EB62F0077586D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3DE62D3D243EB6630077586D /* HazardReporter.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HazardReporter.entitlements; sourceTree = "<group>"; };
+		3DE62D3F243EB6700077586D /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -31,6 +34,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3DE62D40243EB6700077586D /* CloudKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -42,6 +46,7 @@
 			children = (
 				3DE62D28243EB62C0077586D /* HazardReporter */,
 				3DE62D27243EB62C0077586D /* Products */,
+				3DE62D3E243EB6700077586D /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -56,6 +61,7 @@
 		3DE62D28243EB62C0077586D /* HazardReporter */ = {
 			isa = PBXGroup;
 			children = (
+				3DE62D3D243EB6630077586D /* HazardReporter.entitlements */,
 				3DE62D29243EB62C0077586D /* AppDelegate.swift */,
 				3DE62D2B243EB62C0077586D /* SceneDelegate.swift */,
 				3DE62D2D243EB62C0077586D /* ContentView.swift */,
@@ -73,6 +79,14 @@
 				3DE62D32243EB62F0077586D /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		3DE62D3E243EB6700077586D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				3DE62D3F243EB6700077586D /* CloudKit.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -284,6 +298,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = HazardReporter/HazardReporter.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"HazardReporter/Preview Content\"";
 				DEVELOPMENT_TEAM = 9527LC56YN;
@@ -304,6 +319,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = HazardReporter/HazardReporter.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"HazardReporter/Preview Content\"";
 				DEVELOPMENT_TEAM = 9527LC56YN;
