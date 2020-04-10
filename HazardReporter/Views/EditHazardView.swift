@@ -6,6 +6,7 @@
 //  Copyright © 2020 Doug Robison. All rights reserved.
 //
 
+import AVFoundation
 import Combine
 import CoreLocation
 import Foundation
@@ -31,7 +32,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
             case .notDetermined: manager.requestWhenInUseAuthorization()
             case .authorizedWhenInUse, .authorizedAlways:
                 if CLLocationManager.locationServicesEnabled() {
-                    manager.startUpdatingLocation()
+                    locationServicesEnabled()
                 }
             case .restricted, .denied: alertLocationAccessNeeded()
         @unknown default:
@@ -44,13 +45,18 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         lastKnownLocation = locations.last
     }
 
-    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        if status == .authorizedWhenInUse {
-            manager.startUpdatingLocation()
+    private func locationServicesEnabled() {
+        manager.startUpdatingLocation()
+        showLocationAlert = false
+    }
+
+    func locationManager(_: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        if status == .authorizedWhenInUse || status == .authorizedAlways {
+            locationServicesEnabled()
         }
     }
 
-    func alertLocationAccessNeeded() {
+    private func alertLocationAccessNeeded() {
         showLocationAlert = true
     }
 
@@ -59,24 +65,89 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     }
 }
 
+class CameraManager {
+    @Published var showCameraAlert = false
+
+    func takePicture() {
+        let cameraAuthorizationStatus = AVCaptureDevice.authorizationStatus(for: .video)
+
+        switch cameraAuthorizationStatus {
+            case .notDetermined: requestCameraPermission()
+            case .authorized: presentCamera()
+            case .restricted, .denied: alertCameraAccessNeeded()
+        @unknown default:
+                fatalError()
+        }
+    }
+
+    func requestCameraPermission() {
+        AVCaptureDevice.requestAccess(for: .video,
+                                      completionHandler: {accessGranted in
+                                          guard accessGranted == true else { return }
+                                          self.presentCamera()
+        })
+    }
+
+    func presentCamera() {
+        showCameraAlert = false
+
+        let hazardPhotoPicker = UIImagePickerController()
+       // hazardPhotoPicker.sourceType = .camera
+        // hazardPhotoPicker.delegate = self
+
+        // present(hazardPhotoPicker, animated: true, completion: nil)
+    }
+
+    func alertCameraAccessNeeded() {
+        showCameraAlert = true
+    }
+}
+
 class EditHazardViewModel: ObservableObject, Identifiable {
     private let location = LocationManager()
+    private let camera = CameraManager()
     private var disposables = Set<AnyCancellable>()
-    @Published var showLocationAlert = true
+    @Published var showLocationAlert = false
+    @Published var showCameraAlert = false
 
     init() {
         setUp()
     }
 
-    func setUp() {
+    private func setUp() {
         location.$showLocationAlert.sink(receiveValue: {self.showLocationAlert = $0}).store(in: &disposables)
-    }
-
-    func start() {
         location.startUpdating()
+
+        camera.$showCameraAlert.sink(receiveValue: {self.showCameraAlert = $0}).store(in: &disposables)
     }
 
-    deinit {}
+    func getLocationAlert() -> Alert {
+        Alert(title: Text("Need Location Access"),
+              message: Text("Location access is required for including the location of the hazard."),
+              primaryButton: .cancel(),
+              secondaryButton: .default(Text("Allow Location Access"), action: {
+                  let settingsAppURL = URL(string: UIApplication.openSettingsURLString)!
+                  UIApplication.shared.open(settingsAppURL,
+                                            options: [:],
+                                            completionHandler: nil)
+        }))
+    }
+
+    func getCameraAlert() -> Alert {
+        Alert(title: Text("Need Camera Access"),
+              message: Text("Camera access is required for including pictures of hazards."),
+              primaryButton: .cancel(),
+              secondaryButton: .default(Text("Allow Camera"), action: {
+                  let settingsAppURL = URL(string: UIApplication.openSettingsURLString)!
+                  UIApplication.shared.open(settingsAppURL,
+                                            options: [:],
+                                            completionHandler: nil)
+        }))
+    }
+
+    func takeSnapShot() {
+        camera.takePicture()
+    }
 }
 
 struct EditHazardView: View {
@@ -100,7 +171,9 @@ struct EditHazardView: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                 }
                 .padding()
-                Button(action: {}, label: {Text("Snap picture")})
+                Button(action: {
+                    self.viewModel.takeSnapShot()
+                }, label: {Text("Snap picture")})
                 Spacer()
             }
             .navigationBarTitle(Text("Edit Hazard Report"), displayMode: .inline)
@@ -118,18 +191,11 @@ struct EditHazardView: View {
                 Text("Save").bold()
                            })
         }
-        .onAppear {
-            self.viewModel.start()
-        }
         .alert(isPresented: $viewModel.showLocationAlert) {
-            Alert(title: Text("Are you sure you want to delete this?"), message: Text("There is no undo"), primaryButton: .default(Text("Allow Location Access"), action: {
-                self.viewModel.showLocationAlert = false
-                let settingsAppURL = URL(string: UIApplication.openSettingsURLString)!
-                UIApplication.shared.open(settingsAppURL,
-                                          options: [:],
-                                          completionHandler: nil)
-            }),
-                  secondaryButton: .cancel())
+            viewModel.getLocationAlert()
+        }
+        .alert(isPresented: $viewModel.showCameraAlert) {
+            viewModel.getCameraAlert()
         }
     }
 }
