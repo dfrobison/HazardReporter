@@ -14,7 +14,7 @@ import SwiftUI
 class LocationManager: NSObject, CLLocationManagerDelegate {
     private let manager: CLLocationManager
     var lastKnownLocation: CLLocation?
-    @Published var showAlert = false
+    @Published var showLocationAlert = false
 
     init(manager: CLLocationManager = CLLocationManager()) {
         self.manager = manager
@@ -51,7 +51,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     }
 
     func alertLocationAccessNeeded() {
-        showAlert = true
+        showLocationAlert = true
     }
 
     deinit {
@@ -62,19 +62,18 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
 class EditHazardViewModel: ObservableObject, Identifiable {
     private let location = LocationManager()
     private var disposables = Set<AnyCancellable>()
-    @Published var showAlert = true
+    @Published var showLocationAlert = true
 
     init() {
         setUp()
     }
 
     func setUp() {
-        location.$showAlert.sink(receiveValue: {self.showAlert = $0}).store(in: &disposables)
-
+        location.$showLocationAlert.sink(receiveValue: {self.showLocationAlert = $0}).store(in: &disposables)
     }
-    
+
     func start() {
-                location.startUpdating()
+        location.startUpdating()
     }
 
     deinit {}
@@ -122,14 +121,13 @@ struct EditHazardView: View {
         .onAppear {
             self.viewModel.start()
         }
-        .alert(isPresented: $viewModel.showAlert) {
+        .alert(isPresented: $viewModel.showLocationAlert) {
             Alert(title: Text("Are you sure you want to delete this?"), message: Text("There is no undo"), primaryButton: .default(Text("Allow Location Access"), action: {
-                
-                self.viewModel.showAlert = false
+                self.viewModel.showLocationAlert = false
                 let settingsAppURL = URL(string: UIApplication.openSettingsURLString)!
                 UIApplication.shared.open(settingsAppURL,
-                options: [:],
-                completionHandler: nil)
+                                          options: [:],
+                                          completionHandler: nil)
             }),
                   secondaryButton: .cancel())
         }
