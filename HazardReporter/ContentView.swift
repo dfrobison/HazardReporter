@@ -24,46 +24,7 @@ struct HazardItem: View {
     }
 }
 
-struct EditHazardView: View {
-    @Binding var isPresented: Bool
-    @State private var emergencyStatus = 0
-    @State private var hazardDescription: String = ""
 
-    var body: some View {
-        NavigationView {
-            VStack {
-                Picker(selection: $emergencyStatus, label: Text("")) {
-                    Text("Non-Emergency").tag(0)
-                    Text("Emergency!").tag(1)
-                }.pickerStyle(SegmentedPickerStyle())
-                    .padding()
-
-                VStack(alignment: .leading) {
-                Text("Briefly describe the problem you see")
-                TextField("Describe problem", text: $hazardDescription)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                }
-                .padding()
-                Button(action: {}, label: {Text("Snap picture")})
-                Spacer()
-            }
-            .navigationBarTitle(Text("Edit Hazard Report"), displayMode: .inline)
-            .navigationBarItems(leading: Button(action: {
-                print("Dismissing sheet view...")
-                self.isPresented = false
-                           }) {
-                Text("Cancel").bold()
-            },
-                                
-            trailing: Button(action: {
-                print("Dismissing sheet view...")
-                self.isPresented = false
-                           }) {
-                Text("Save").bold()
-                           })
-        }
-    }
-}
 
 struct ActiveHazardsView: View {
     @State private var showModal: Bool = false

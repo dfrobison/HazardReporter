@@ -14,6 +14,7 @@
 		3DE62D33243EB62F0077586D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3DE62D32243EB62F0077586D /* Preview Assets.xcassets */; };
 		3DE62D36243EB62F0077586D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3DE62D34243EB62F0077586D /* LaunchScreen.storyboard */; };
 		3DE62D40243EB6700077586D /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DE62D3F243EB6700077586D /* CloudKit.framework */; };
+		3DEF308E243FF655000A3129 /* EditHazardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DEF308D243FF655000A3129 /* EditHazardView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,6 +28,7 @@
 		3DE62D37243EB62F0077586D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3DE62D3D243EB6630077586D /* HazardReporter.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HazardReporter.entitlements; sourceTree = "<group>"; };
 		3DE62D3F243EB6700077586D /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
+		3DEF308D243FF655000A3129 /* EditHazardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditHazardView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +63,7 @@
 		3DE62D28243EB62C0077586D /* HazardReporter */ = {
 			isa = PBXGroup;
 			children = (
+				3DEF308C243FF638000A3129 /* Views */,
 				3DE62D3D243EB6630077586D /* HazardReporter.entitlements */,
 				3DE62D29243EB62C0077586D /* AppDelegate.swift */,
 				3DE62D2B243EB62C0077586D /* SceneDelegate.swift */,
@@ -87,6 +90,14 @@
 				3DE62D3F243EB6700077586D /* CloudKit.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		3DEF308C243FF638000A3129 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				3DEF308D243FF655000A3129 /* EditHazardView.swift */,
+			);
+			path = Views;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -162,6 +173,7 @@
 			files = (
 				3DE62D2A243EB62C0077586D /* AppDelegate.swift in Sources */,
 				3DE62D2C243EB62C0077586D /* SceneDelegate.swift in Sources */,
+				3DEF308E243FF655000A3129 /* EditHazardView.swift in Sources */,
 				3DE62D2E243EB62C0077586D /* ContentView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
