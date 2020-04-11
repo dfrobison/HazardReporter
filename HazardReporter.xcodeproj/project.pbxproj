@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3D376AFF244127FC006D0CFA /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D376AFE244127FC006D0CFA /* LocationManager.swift */; };
+		3D376B0124412835006D0CFA /* CameraAuthorizationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D376B0024412835006D0CFA /* CameraAuthorizationManager.swift */; };
+		3D376B032441357A006D0CFA /* CaptureImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D376B022441357A006D0CFA /* CaptureImageView.swift */; };
 		3DE62D2A243EB62C0077586D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DE62D29243EB62C0077586D /* AppDelegate.swift */; };
 		3DE62D2C243EB62C0077586D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DE62D2B243EB62C0077586D /* SceneDelegate.swift */; };
 		3DE62D2E243EB62C0077586D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DE62D2D243EB62C0077586D /* ContentView.swift */; };
@@ -18,6 +21,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3D376AFE244127FC006D0CFA /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
+		3D376B0024412835006D0CFA /* CameraAuthorizationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraAuthorizationManager.swift; sourceTree = "<group>"; };
+		3D376B022441357A006D0CFA /* CaptureImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureImageView.swift; sourceTree = "<group>"; };
 		3DE62D26243EB62C0077586D /* HazardReporter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HazardReporter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3DE62D29243EB62C0077586D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3DE62D2B243EB62C0077586D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -43,6 +49,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3D376AFD244127D1006D0CFA /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				3D376AFE244127FC006D0CFA /* LocationManager.swift */,
+				3D376B0024412835006D0CFA /* CameraAuthorizationManager.swift */,
+			);
+			path = Managers;
+			sourceTree = "<group>";
+		};
 		3DE62D1D243EB62C0077586D = {
 			isa = PBXGroup;
 			children = (
@@ -63,6 +78,7 @@
 		3DE62D28243EB62C0077586D /* HazardReporter */ = {
 			isa = PBXGroup;
 			children = (
+				3D376AFD244127D1006D0CFA /* Managers */,
 				3DEF308C243FF638000A3129 /* Views */,
 				3DE62D3D243EB6630077586D /* HazardReporter.entitlements */,
 				3DE62D29243EB62C0077586D /* AppDelegate.swift */,
@@ -96,6 +112,7 @@
 			isa = PBXGroup;
 			children = (
 				3DEF308D243FF655000A3129 /* EditHazardView.swift */,
+				3D376B022441357A006D0CFA /* CaptureImageView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -171,9 +188,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3D376B032441357A006D0CFA /* CaptureImageView.swift in Sources */,
 				3DE62D2A243EB62C0077586D /* AppDelegate.swift in Sources */,
 				3DE62D2C243EB62C0077586D /* SceneDelegate.swift in Sources */,
+				3D376AFF244127FC006D0CFA /* LocationManager.swift in Sources */,
 				3DEF308E243FF655000A3129 /* EditHazardView.swift in Sources */,
+				3D376B0124412835006D0CFA /* CameraAuthorizationManager.swift in Sources */,
 				3DE62D2E243EB62C0077586D /* ContentView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

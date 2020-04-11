@@ -24,12 +24,26 @@ struct HazardItem: View {
     }
 }
 
-
-
 struct ActiveHazardsView: View {
+    @ObservedObject var viewModel: EditHazardViewModel = EditHazardViewModel()
     @State private var showModal: Bool = false
 
     var body: some View {
+        
+        if !self.viewModel.locationAuthorized {
+        
+            
+      return AnyView(
+        
+        Text("Help")
+        .alert(isPresented: $viewModel.showLocationAlert) {
+            viewModel.getLocationAlert()
+        }.onAppear{self.viewModel.startUpdating()} // alert
+      )
+        
+        } else {
+        
+   return AnyView(
         NavigationView {
             VStack {
                 List {
@@ -38,7 +52,11 @@ struct ActiveHazardsView: View {
             }
             .navigationBarTitle("Active Hazards", displayMode: .inline)
             .navigationBarItems(trailing: Button(action: {
+               
                 self.showModal.toggle()
+
+               
+
                 }, label:
                 {
                     Image(systemName: "plus")
@@ -47,8 +65,13 @@ struct ActiveHazardsView: View {
                     EditHazardView(isPresented: self.$showModal)
                 }
             )
+        }.onAppear{self.viewModel.startUpdating()} // NavigationView
+        
+        
+        )
         }
-    }
+        
+    } // body
 }
 
 struct ResolvedHazardsView: View {

@@ -6,119 +6,38 @@
 //  Copyright © 2020 Doug Robison. All rights reserved.
 //
 
-import AVFoundation
 import Combine
-import CoreLocation
 import Foundation
 import SwiftUI
 
-class LocationManager: NSObject, CLLocationManagerDelegate {
-    private let manager: CLLocationManager
-    var lastKnownLocation: CLLocation?
-    @Published var showLocationAlert = false
-
-    init(manager: CLLocationManager = CLLocationManager()) {
-        self.manager = manager
-        super.init()
-    }
-
-    func startUpdating() {
-        let locationAuthorizationStatus = CLLocationManager.authorizationStatus()
-
-        manager.delegate = self
-        manager.desiredAccuracy = kCLLocationAccuracyBest
-
-        switch locationAuthorizationStatus {
-            case .notDetermined: manager.requestWhenInUseAuthorization()
-            case .authorizedWhenInUse, .authorizedAlways:
-                if CLLocationManager.locationServicesEnabled() {
-                    locationServicesEnabled()
-                }
-            case .restricted, .denied: alertLocationAccessNeeded()
-        @unknown default:
-                fatalError()
-        }
-    }
-
-    func locationManager(_: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        print(locations)
-        lastKnownLocation = locations.last
-    }
-
-    private func locationServicesEnabled() {
-        manager.startUpdatingLocation()
-        showLocationAlert = false
-    }
-
-    func locationManager(_: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        if status == .authorizedWhenInUse || status == .authorizedAlways {
-            locationServicesEnabled()
-        }
-    }
-
-    private func alertLocationAccessNeeded() {
-        showLocationAlert = true
-    }
-
-    deinit {
-        manager.stopUpdatingLocation()
-    }
-}
-
-class CameraManager {
-    @Published var showCameraAlert = false
-
-    func takePicture() {
-        let cameraAuthorizationStatus = AVCaptureDevice.authorizationStatus(for: .video)
-
-        switch cameraAuthorizationStatus {
-            case .notDetermined: requestCameraPermission()
-            case .authorized: presentCamera()
-            case .restricted, .denied: alertCameraAccessNeeded()
-        @unknown default:
-                fatalError()
-        }
-    }
-
-    func requestCameraPermission() {
-        AVCaptureDevice.requestAccess(for: .video,
-                                      completionHandler: {accessGranted in
-                                          guard accessGranted == true else { return }
-                                          self.presentCamera()
-        })
-    }
-
-    func presentCamera() {
-        showCameraAlert = false
-
-        let hazardPhotoPicker = UIImagePickerController()
-       // hazardPhotoPicker.sourceType = .camera
-        // hazardPhotoPicker.delegate = self
-
-        // present(hazardPhotoPicker, animated: true, completion: nil)
-    }
-
-    func alertCameraAccessNeeded() {
-        showCameraAlert = true
-    }
-}
-
 class EditHazardViewModel: ObservableObject, Identifiable {
     private let location = LocationManager()
-    private let camera = CameraManager()
+    private let camera = CameraAuthorizationManager()
     private var disposables = Set<AnyCancellable>()
     @Published var showLocationAlert = false
     @Published var showCameraAlert = false
+    @Published var cameraAuthorized = false
+     @Published var locationAuthorized = false
 
     init() {
         setUp()
     }
 
     private func setUp() {
-        location.$showLocationAlert.sink(receiveValue: {self.showLocationAlert = $0}).store(in: &disposables)
-        location.startUpdating()
+        location.locationAuthorizationNeeded.receive(on: DispatchQueue.main).sink(receiveValue: {
+            print("Location = \($0)")
+            self.showLocationAlert = $0
 
-        camera.$showCameraAlert.sink(receiveValue: {self.showCameraAlert = $0}).store(in: &disposables)
+        }).store(in: &disposables)
+        
+        location.isLocationAuthorized.receive(on: DispatchQueue.main).sink(receiveValue: {
+            print("Location = \($0)")
+            self.locationAuthorized = $0
+
+        }).store(in: &disposables)
+
+        camera.needCameraAuthorization.receive(on: DispatchQueue.main).sink(receiveValue: {self.showCameraAlert = $0}).store(in: &disposables)
+        camera.cameraAuthorized.receive(on: DispatchQueue.main).sink(receiveValue: {self.cameraAuthorized = $0}).store(in: &disposables)
     }
 
     func getLocationAlert() -> Alert {
@@ -146,7 +65,11 @@ class EditHazardViewModel: ObservableObject, Identifiable {
     }
 
     func takeSnapShot() {
-        camera.takePicture()
+        camera.authorizeCamera()
+    }
+
+    func startUpdating() {
+        location.startUpdating()
     }
 }
 
@@ -155,44 +78,54 @@ struct EditHazardView: View {
     @Binding var isPresented: Bool
     @State private var emergencyStatus = 0
     @State private var hazardDescription: String = ""
+    @State var image: Image? = nil
 
     var body: some View {
-        return NavigationView {
-            VStack {
-                Picker(selection: $emergencyStatus, label: Text("")) {
-                    Text("Non-Emergency").tag(0)
-                    Text("Emergency!").tag(1)
-                }.pickerStyle(SegmentedPickerStyle())
-                    .padding()
+        NavigationView {
+            ZStack {
+                VStack {
+                    Picker(selection: $emergencyStatus, label: Text("")) {
+                        Text("Non-Emergency").tag(0)
+                        Text("Emergency!").tag(1)
+                    }.pickerStyle(SegmentedPickerStyle())
+                        .padding()
 
-                VStack(alignment: .leading) {
-                    Text("Briefly describe the problem you see")
-                    TextField("Describe problem", text: $hazardDescription)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                }
-                .padding()
-                Button(action: {
-                    self.viewModel.takeSnapShot()
+                    VStack(alignment: .leading) {
+                        Text("Briefly describe the problem you see")
+                        TextField("Describe problem", text: $hazardDescription)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                    }
+                    .padding()
+                    Button(action: {
+                        //self.viewModel.takeSnapShot()
+                        self.viewModel.startUpdating()
+
                 }, label: {Text("Snap picture")})
-                Spacer()
+
+                    Spacer()
+
+                    image?.resizable()
+                        .frame(width: 250, height: 250)
+
+                    Spacer()
+                }
+
+                if viewModel.cameraAuthorized {
+                    CaptureImageView(isShown: $viewModel.cameraAuthorized, image: $image)
+                }
             }
             .navigationBarTitle(Text("Edit Hazard Report"), displayMode: .inline)
             .navigationBarItems(leading: Button(action: {
-                print("Dismissing sheet view...")
                 self.isPresented = false
                            }) {
                 Text("Cancel").bold()
             },
                                 
             trailing: Button(action: {
-                print("Dismissing sheet view...")
                 self.isPresented = false
                            }) {
                 Text("Save").bold()
                            })
-        }
-        .alert(isPresented: $viewModel.showLocationAlert) {
-            viewModel.getLocationAlert()
         }
         .alert(isPresented: $viewModel.showCameraAlert) {
             viewModel.getCameraAlert()
