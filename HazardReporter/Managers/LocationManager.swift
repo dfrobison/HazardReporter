@@ -13,7 +13,7 @@ import Combine
 
 class LocationManager: NSObject, CLLocationManagerDelegate {
     private let manager: CLLocationManager
-    var lastKnownLocation: CLLocation?
+    var currentLocation: CLLocation? = nil
     let locationAuthorizationNeeded = CurrentValueSubject<Bool, Never>(false)
     let isLocationAuthorized = CurrentValueSubject<Bool, Never>(false)
 
@@ -42,7 +42,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
 
     func locationManager(_: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         print(locations)
-        lastKnownLocation = locations.last
+        currentLocation = locations.last
     }
 
     private func locationServicesEnabled() {

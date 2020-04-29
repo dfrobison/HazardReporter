@@ -6,6 +6,7 @@
 //  Copyright © 2020 Doug Robison. All rights reserved.
 //
 
+import CloudKit
 import Combine
 import Foundation
 import SwiftUI
@@ -17,7 +18,7 @@ class EditHazardViewModel: ObservableObject, Identifiable {
     @Published var showLocationAlert = false
     @Published var showCameraAlert = false
     @Published var cameraAuthorized = false
-     @Published var locationAuthorized = false
+    @Published var locationAuthorized = false
 
     init() {
         setUp()
@@ -29,7 +30,7 @@ class EditHazardViewModel: ObservableObject, Identifiable {
             self.showLocationAlert = $0
 
         }).store(in: &disposables)
-        
+
         location.isLocationAuthorized.receive(on: DispatchQueue.main).sink(receiveValue: {
             print("Location = \($0)")
             self.locationAuthorized = $0
@@ -38,6 +39,7 @@ class EditHazardViewModel: ObservableObject, Identifiable {
 
         camera.needCameraAuthorization.receive(on: DispatchQueue.main).sink(receiveValue: {self.showCameraAlert = $0}).store(in: &disposables)
         camera.cameraAuthorized.receive(on: DispatchQueue.main).sink(receiveValue: {self.cameraAuthorized = $0}).store(in: &disposables)
+        startUpdating()
     }
 
     func getLocationAlert() -> Alert {
@@ -71,6 +73,10 @@ class EditHazardViewModel: ObservableObject, Identifiable {
     func startUpdating() {
         location.startUpdating()
     }
+
+    func currentLocation() -> CLLocation? {
+        location.currentLocation
+    }
 }
 
 struct EditHazardView: View {
@@ -79,6 +85,7 @@ struct EditHazardView: View {
     @State private var emergencyStatus = 0
     @State private var hazardDescription: String = ""
     @State var image: Image? = nil
+    @State var uiImage: UIImage? = nil
 
     var body: some View {
         NavigationView {
@@ -97,8 +104,7 @@ struct EditHazardView: View {
                     }
                     .padding()
                     Button(action: {
-                        //self.viewModel.takeSnapShot()
-                        self.viewModel.startUpdating()
+                        self.viewModel.takeSnapShot()
 
                 }, label: {Text("Snap picture")})
 
@@ -111,7 +117,7 @@ struct EditHazardView: View {
                 }
 
                 if viewModel.cameraAuthorized {
-                    CaptureImageView(isShown: $viewModel.cameraAuthorized, image: $image)
+                    CaptureImageView(isShown: $viewModel.cameraAuthorized, image: $image, uiImage: $uiImage)
                 }
             }
             .navigationBarTitle(Text("Edit Hazard Report"), displayMode: .inline)
@@ -123,6 +129,41 @@ struct EditHazardView: View {
                                 
             trailing: Button(action: {
                 self.isPresented = false
+                let hazardReport = CKRecord(recordType: "HazardReport")
+                hazardReport["isEmergency"] = self.emergencyStatus
+                hazardReport["hazardDescription"] = self.hazardDescription
+                hazardReport["hazardLocation"] = self.viewModel.currentLocation()
+                hazardReport["isResolved"] = NSNumber(integerLiteral: 0)
+
+                if let hazardPhoto = self.image {
+                    // Generate unique file name
+                    let hazardPhotoFileName = ProcessInfo.processInfo.globallyUniqueString + ".jpg"
+
+                    // Create URL in temp directory
+                    let hazardPhotoFileURL = URL(fileURLWithPath: NSTemporaryDirectory())
+                        .appendingPathComponent(hazardPhotoFileName)
+
+                    // Make JPEG
+                    let hazardPhotoData = self.uiImage!.jpegData(compressionQuality: 0.70)
+
+                    // Write to disk
+                    do {
+                        try hazardPhotoData?.write(to: hazardPhotoFileURL)
+                    } catch {
+                        print("Could not save hazard photo to disk")
+                    }
+
+                    // Convert to CKAsset and store with CKRecord
+                    hazardReport["hazardPhoto"] = CKAsset(fileURL: hazardPhotoFileURL)
+                }
+
+                let container = CKContainer.default()
+                let database = container.publicCloudDatabase
+
+                database.save(hazardReport) { _, _ in
+                    // Stay tuned!
+                }
+
                            }) {
                 Text("Save").bold()
                            })
